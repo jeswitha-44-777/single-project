@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Stories Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c6eb5;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: #ff7e5f;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 25px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: #2c6eb5;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .stat-card i {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #2c6eb5;
+        }
+        
+        .stat-card h3 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            color: #2c6eb5;
+        }
+        
+        .stat-card p {
+            color: #777;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 400px;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            margin: 40px 0 20px;
+            color: #2c6eb5;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+        }
+        
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .story-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .story-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .story-image {
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        .story-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .story-card:hover .story-image img {
+            transform: scale(1.05);
+        }
+        
+        .story-content {
+            padding: 20px;
+        }
+        
+        .story-content h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2c6eb5;
+        }
+        
+        .story-content p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .story-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            font-size: 13px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #777;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            nav ul {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .stories-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-globe-americas"></i>
+                <span>Travel Stories</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Map</a></li>
+                    <li><a href="#">Stories</a></li>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <div class="dashboard-grid">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3>24</h3>
+                    <p>Countries Visited</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-camera"></i>
+                    <h3>156</h3>
+                    <p>Photos Taken</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-book"></i>
+                    <h3>18</h3>
+                    <p>Stories Written</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>3.2k</h3>
+                    <p>Story Likes</p>
+                </div>
+            </div>
+            
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">
+            <i class="fas fa-book-open"></i>
+            Recent Travel Stories
+        </h2>
+        
+        <div class="stories-grid">
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/95c9c8e2-ad69-47a5-be93-d0ff9b6264c1.png" alt="Santorini sunset with white buildings and blue domes overlooking the Aegean Sea">
+                </div>
+                <div class="story-content">
+                    <h3>Santorini Dreams</h3>
+                    <p>The breathtaking sunset views from Oia are something I'll never forget. The way the sun dips into the Aegean Sea is magical.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> May 15, 2023</span>
+                        <span><i class="fas fa-heart"></i> 243</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5e67fb87-ee41-4fa0-bb76-88ca97e9cca7.png" alt="Snow-capped Japanese Alps with cherry blossoms in foreground">
+                </div>
+                <div class="story-content">
+                    <h3>Japanese Alps Adventure</h3>
+                    <p>Hiking through the Japanese Alps during cherry blossom season was a once-in-a-lifetime experience that exceeded all expectations.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> April 3, 2023</span>
+                        <span><i class="fas fa-heart"></i> 187</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/187e03f9-717c-48f6-a922-70268118bfc2.png" alt="African safari with elephants roaming the savanna at golden hour">
+                </div>
+                <div class="story-content">
+                    <h3>Kenyan Safari</h3>
+                    <p>Witnessing the Great Migration in Maasai Mara was humbling. The raw beauty of nature here is simply awe-inspiring.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> March 22, 2023</span>
+                        <span><i class="fas fa-heart"></i> 321</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1da319da-2a92-4c93-be4b-3f9745f6e9b7.png" alt="Colorful buildings of the Amalfi Coast clinging to cliffs above Mediterranean Sea">
+                </div>
+                <div class="story-content">
+                    <h3>Amalfi Coast Journey</h3>
+                    <p>Driving along the winding coastal roads of Southern Italy, with breathtaking views at every turn, was absolutely unforgettable.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> February 10, 2023</span>
+                        <span><i class="fas fa-heart"></i> 198</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">
+            <i class="fas fa-star"></i>
+            Popular Destinations
+        </h2>
+        
+        <div class="stories-grid">
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d721bfdc-afcc-475f-9b13-e178b5a4d3a9.png" alt="Eiffel Tower illuminated at night with city lights of Paris">
+                </div>
+                <div class="story-content">
+                    <h3>Parisian Nights</h3>
+                    <p>The City of Lights truly comes alive after dark. From Montmartre to the Seine, Paris at night is pure magic.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> January 5, 2023</span>
+                        <span><i class="fas fa-heart"></i> 276</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0f3d2ffc-cac1-4cd1-adf2-f181c7d172d4.png" alt="Turquoise waters and limestone cliffs of Thailand's islands">
+                </div>
+                <div class="story-content">
+                    <h3>Island Hopping in Thailand</h3>
+                    <p>Exploring the pristine islands and emerald waters of Southern Thailand was like stepping into a paradise.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> December 12, 2022</span>
+                        <span><i class="fas fa-heart"></i> 305</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3ff0acc0-c7f0-4a7d-805d-42756101d3ae.png" alt="Majestic mountain range in New Zealand with lake reflection">
+                </div>
+                <div class="story-content">
+                    <h3>New Zealand's South Island</h3>
+                    <p>The dramatic landscapes of New Zealand's South Island are unlike anywhere else on Earth. A true adventurer's paradise.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> November 8, 2022</span>
+                        <span><i class="fas fa-heart"></i> 289</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="story-card">
+                <div class="story-image">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/319eff81-7e50-4826-a708-2a8dfd962318.png" alt="Ancient Incan ruins of Machu Picchu with mountain backdrop">
+                </div>
+                <div class="story-content">
+                    <h3>Machu Picchu Trek</h3>
+                    <p>The four-day Inca Trail trek to Machu Picchu was challenging but rewarding beyond measure. The views are absolutely spectacular.</p>
+                    <div class="story-meta">
+                        <span><i class="fas fa-calendar"></i> October 15, 2022</span>
+                        <span><i class="fas fa-heart"></i> 332</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Travel Stories Dashboard | Created with <i class="fas fa-heart" style="color: #ff7e5f;"></i> for wanderlust souls</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([30, 0], 2);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add markers for popular destinations
+        const destinations = [
+            {lat: 36.3932, lng: 25.4615, name: "Santorini, Greece"},
+            {lat: 36.5748, lng: 139.0644, name: "Japanese Alps"},
+            {lat: -1.2921, lng: 36.8219, name: "Nairobi, Kenya"},
+            {lat: 40.6343, lng: 14.6024, name: "Amalfi Coast, Italy"},
+            {lat: 48.8566, lng: 2.3522, name: "Paris, France"},
+            {lat: 7.9500, lng: 98.2800, name: "Phuket, Thailand"},
+            {lat: -43.5866, lng: 170.1415, name: "South Island, NZ"},
+            {lat: -13.1631, lng: -72.5450, name: "Machu Picchu, Peru"}
+        ];
+        
+        destinations.forEach(destination => {
+            L.marker([destination.lat, destination.lng])
+                .addTo(map)
+                .bindPopup(<b>${destination.name}</b>);
+        });
+    </script>
+</body>
+</html>

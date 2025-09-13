@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login & Signup</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      width: 360px;
+      max-width: 100%;
+    }
+
+    .tabs {
+      display: flex;
+      cursor: pointer;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 15px;
+      background-color: #f0f0f0;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .tab:hover {
+      background-color: #e0e0e0;
+    }
+
+    .tab.active {
+      background-color: #fff;
+      border-bottom: 2px solid transparent;
+    }
+
+    .form-container {
+      padding: 30px;
+    }
+
+    .form {
+      display: none;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4a90e2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #357ABD;
+    }
+
+    .note {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="showForm('login')">Login</div>
+      <div class="tab" onclick="showForm('signup')">Signup</div>
+    </div>
+
+    <div class="form-container">
+      <!-- Login Form -->
+      <form id="login" class="form active">
+        <input type="email" placeholder="Email" required />
+        <input type="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+        <div class="note">Forgot password?</div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signup" class="form">
+        <input type="text" placeholder="Full Name" required />
+        <input type="email" placeholder="Email" required />
+        <input type="password" placeholder="Password" required />
+        <input type="password" placeholder="Confirm Password" required />
+        <button type="submit">Signup</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const forms = document.querySelectorAll('.form');
+
+    function showForm(formId) {
+      tabs.forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      forms.forEach(form => {
+        form.classList.remove('active');
+      });
+
+      document.getElementById(formId).classList.add('active');
+      document.querySelector(tab[onclick="showForm('${formId}')"]).classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
